@@ -1,6 +1,7 @@
 cp_gs_v5.1:cp_gs_v5.1
 gobp_gs_v5.1:gobp_gs_v5.1
 h_gs_v5.1:h_gs_v5.1
+pathprint.Hs.gs:pathprint.Hs.gs
 pathCor_CPv5.1_dframe:pathCor_CPv5.1_dframe
 pathCor_GOBPv5.1_dframe:pathCor_GOBPv5.1_dframe
 pathCor_Hv5.1_dframe:pathCor_Hv5.1_dframe

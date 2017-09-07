@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{pcxn.db}
+% \VignetteIndexEntry{pcxn.db}
 \documentclass{article}
 \usepackage{Sweave}
 \usepackage{amsmath}
@@ -9,78 +9,137 @@
 \usepackage{hyperref}
 \usepackage[usenames]{color}
 \definecolor{midnightblue}{rgb}{0.098,0.098,0.439}
+\definecolor{red}{rgb}{0.999,0.000,0.000}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{xleftmargin=2em, 
+fontshape=sl,formatcom=\color{midnightblue}, fontsize=\small}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{xleftmargin=2em, 
+fontshape=sl,formatcom=\color{red}, fontsize=\small}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{xleftmargin=2em, 
+fontshape=sl,formatcom=\color{midnightblue}, fontsize=\small}
 \fvset{listparameters={\setlength{\topsep}{0pt}}}
 \renewenvironment{Schunk}{\vspace{\topsep}}{\vspace{\topsep}}
-\setkeys{Gin}{width=\textwidth}
+\SweaveOpts{keep.source=TRUE, pdf.version=1.4, eps = FALSE}
+\setkeys{Gin}{width=1.2\textwidth}
 \begin{document}
 \SweaveOpts{concordance=TRUE}
 \title{About pcxn.db}
+\author{Sokratis Kariotis}
 \maketitle
-
+\tableofcontents
 \section{Description}
-This package contains ...
+This package contains correlation coefficients and p values between pre-defined
+gene sets within MSigDB H hallmark gene sets, MSigDB C2 CP (Canonical pathways),
+MSigDB C5 GO BP gene sets and Pathprint respectively.It also entails the gene
+members of each gene set or pathway. 
 
 \section{Using pcxn.db wrapper functions to query and visualize the data}
 
-4 functions can be used:
+The various data in this package can be utilized using the following functions 
+\begin{itemize}
+\item
+Select a single pathway/gene set from one of the four collections ( MSigDB H 
+hallmark gene sets, MSigDB C2 Canonical pathways, MSigDB C5 GO BP gene sets, 
+and Pathprint ) and discover its correlated pathway/gene sets within the 
+same collection.
+\item
+Discover correlation relationships among multiple pathways/gene sets 
+identified by GSEA (gene set enrichment analysis). All the input 
+pathways/gene sets should come from the same collection. MSigDB H hallmark 
+gene sets, MSigDB C2 Canonical pathways, MSigDB C5 GO BP gene sets, 
+and Pathprint are treated as four separate collections.
+\item
+Acquire the gene members given one of the available pathways.
+\item
+Draw a heatmap of a pcxn object.
+\item
+Create a network of a pcxn object.
+\end{itemize}
+\subsection{Explore using a pathway or gene set}
+Each pathway collection (Pathprint, MSigDB H, MSigDB C2 CP and MSigDB C5 GO BP)
+can be explored using a single pathway of interest as a query. The search can be
+refined by choosing the number of top correlated gene sets, the minimum absolute
+correlation and maximum p-value allowed.
 
-<<>>=
-# use the pathprint library
-#library(pcxn.db)
-#library()
-#library()
+<<explore_pcxn>>=
+# Use the pcxn.db package to select a query gene set from a specific collection
+# while requesting the 10 most correlated neighbors and specific cut-offs for 
+# minimum absolute correlation and maximum p-value
 
-# load  the data
-#ds = c("cp_gs_v5.1", "genesets","pathprint.Hs.gs"
-#       ,"platform.thresholds", "pluripotents.frame")
-#data(list = ds)
+library(pcxn.db)
 
-# see available platforms
-#names(chipframe)
+pcxn_obj <- explore_pcxn(collection = "pathprint",
+                  query_geneset = "Alzheimer's disease (KEGG)",
+                  top = 10,
+                  min_abs_corr = 0.05,
+                  max_pval = 0.05)
+@
 
-# extract GEO.fingerprint.matrix and GEO.metadata.matrix
-#GEO.fingerprint.matrix = assays(result)$fingerprint
-#GEO.metadata.matrix = colData(result)
+\subsection{Analyze using groups of pathways}
+For each pathway collection (Pathprint, MSigDB H, MSigDB C2 CP and 
+MSigDB C5 GO BP) the relationships between groups of pathways, shown to be 
+enriched by gene set enrichment, can be analysed using the analyse_pcxn
+function. In this case, one or two groups of pathways can be used as input. The 
+search can be refined by choosing the number of top correlated gene sets, 
+the minimum absolute correlation and maximum p-value allowed.
 
-# create consensus fingerprint for pluripotent samples
-#pluripotent.consensus<-consensusFingerprint(
-#	GEO.fingerprint.matrix[,pluripotents.frame$GSM],
-#	threshold=0.9)
+<<analyze_pcxn>>=
+# Use the pcxn.db package to select one or two oathway groups from a specific 
+# collection while requesting the 10 most correlated neighbors and specific
+# cut-offs for minimum absolute correlation and maximum p-value
 
-# calculate distance from the pluripotent consensus
-#geo.pluripotentDistance<-consensusDistance(
-#	pluripotent.consensus, GEO.fingerprint.matrix)
+library(pcxn.db)
 
-# plot histograms
-#par(mfcol = c(2,1), mar = c(0, 4, 4, 2))
+pcxn_obj <- analyze_pcxn("pathprint",c("ABC transporters (KEGG)",
+                                       "ACE Inhibitor Pathway (Wikipathways)",
+                                       "AR down reg. targets (Netpath)"),
+                         c("DNA Repair (Reactome)"), 10, 0.05, 0.05)
+@
 
-#geo.pluripotentDistance.hist<-hist(
- # geo.pluripotentDistance[,"distance"],
-#	nclass = 50, xlim = c(0,1), 
-#	main = "Distance from pluripotent consensus")
+\subsection{Acquire gene members}
+Acquire the list of gene members that belong to any of the pathways or gene sets
+found in the pcxn database
 
-#par(mar = c(7, 4, 4, 2))
+<<gmembers_pcxn>>=
+# Use the pcxn.db package to select pathway from any collection and get it's
+# gene members as a list
 
-#hist(geo.pluripotentDistance[
-#  pluripotents.frame$GSM, "distance"
-#  ],
-#	breaks = geo.pluripotentDistance.hist$breaks, 
-#	xlim = c(0,1), 
-#	main = "", 
-#	xlab = "above: all GEO, below: pluripotent samples")
-	
-# annotate top 100 matches not in original seed with metadata
-#geo.pluripotentDistance.noSeed<-geo.pluripotentDistance[
-#	!(rownames(geo.pluripotentDistance)
-#	 %in% 
-#	 pluripotents.frame$GSM),
-#	]
+library(pcxn.db)
 
-#top.noSeed.meta<-GEO.metadata.matrix[
-#    match(
- #    head(rownames(geo.pluripotentDistance.noSeed), 100),
-  #                             rownames(GEO.metadata.matrix)),
- #   ]
-#print(top.noSeed.meta[, c(1:4)])
+# gene_member_list <- gmembers_pcxn("Alzheimer's disease (KEGG)")
+@
+
+\subsection{Draw a heatmap of a pcxn.obj}
+Draw a heatmap of a pcxn object produced by explore_pcxn() or analyse_pcxn(). A
+number of clustering methods are available.
+
+<<heatmap_pcxn>>=
+# Use the pcxn.db package to draw a heatmap based on a pcxn object
+
+library(pcxn.db)
+
+# Creare the pcxn.obj we need as an input
+pcxn_obj <- analyze_pcxn("pathprint",c("ABC transporters (KEGG)",
+                                       "ACE Inhibitor Pathway (Wikipathways)",
+                                       "AR down reg. targets (Netpath)"),
+                         c("DNA Repair (Reactome)"), 10, 0.05, 0.05)
+
+heatmap <- heatmap_pcxn(pcxn_obj, "complete")
+@
+
+\subsection{Create a network of a pcxn.obj}
+Create a network visualisation of a pcxn object produced by explore_pcxn() 
+or analyse_pcxn().  
+
+<<network_pcxn>>=
+# Use the pcxn.db package to draw a heatmap based on a pcxn object
+
+library(pcxn.db)
+
+pcxn_obj <- analyze_pcxn("pathprint",c("ABC transporters (KEGG)",
+                                       "ACE Inhibitor Pathway (Wikipathways)",
+                                       "AR down reg. targets (Netpath)"),
+                         c("DNA Repair (Reactome)"), 10, 0.05, 0.05)
+
+network <- network_pcxn(pcxn_obj)
 @
 \end{document}
